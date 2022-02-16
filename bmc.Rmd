@@ -1,0 +1,216 @@
+---
+title: "SNP Selection LassoNet"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(xtable)
+```
+
+```{r}
+df <- read_csv("final_hapmap3ceu.csv", 
+               col_names = c("h2s", "i", "k", "genvar", "method", "n_causals", "svm", "lr", "d"),
+               col_types = "diidciddi"
+               )
+df
+```
+
+fig 2: genvar 0.7 d 10k
+```{r}
+fig2 <-
+  df %>% 
+  filter(d == 10000, genvar == 0.7) %>%
+  select(h2s, k, method, n_causals, i) %>%
+  pivot_wider(names_from = method, values_from = n_causals) %>%
+  group_by(h2s, k) %>%
+  summarise(median_p = median(p), sd_p = sd(p), median_ln = median(ln), sd_ln = sd(ln), w= wilcox.test(p, ln)$p.value) %>%
+  mutate(sd_p = sprintf("%.1f", sd_p), sd_ln = sprintf("%.1f", sd_ln), sig = (w <= 0.01)) %>%
+  mutate(`Median # SNPs P-thresholding  (sd)` = str_c(median_p, " (", sd_p, ")"), `Median # SNPs LassoNet (sd)` = str_c(median_ln, " (", sd_ln, ")")) %>%
+  select(h2s, k, `Median # SNPs P-thresholding  (sd)`, `Median # SNPs LassoNet (sd)`, w, sig)
+fig2
+```
+```{r}
+fig2 %>%
+  select(-w, -sig) %>%
+  xtable()
+```
+
+```{r}
+fig2$sig
+```
+
+fig3: genvar 0.3 d 10k
+
+```{r}
+fig3 <-
+  df %>% 
+  filter(d == 10000, genvar == 0.3) %>%
+  select(h2s, k, method, n_causals, i) %>%
+  pivot_wider(names_from = method, values_from = n_causals) %>%
+  group_by(h2s, k) %>%
+  summarise(median_p = median(p), sd_p = sd(p), median_ln = median(ln), sd_ln = sd(ln), w= wilcox.test(p, ln)$p.value) %>%
+  mutate(sd_p = sprintf("%.1f", sd_p), sd_ln = sprintf("%.1f", sd_ln), sig = (w <= 0.01)) %>%
+  mutate(`Median # SNPs P-thresholding  (sd)` = str_c(median_p, " (", sd_p, ")"), `Median # SNPs LassoNet (sd)` = str_c(median_ln, " (", sd_ln, ")")) %>%
+  select(h2s, k, `Median # SNPs P-thresholding  (sd)`, `Median # SNPs LassoNet (sd)`, w, sig)
+fig3
+```
+```{r}
+fig3 %>%
+  select(-w) %>%
+  xtable() %>%
+  print(include.rownames=FALSE)
+```
+
+fig4 d 3k
+```{r}
+fig4 <-
+  df %>% 
+  filter(d == 3000, genvar == 0.7) %>%
+  select(h2s, k, method, n_causals, i) %>%
+  pivot_wider(names_from = method, values_from = n_causals) %>%
+  group_by(h2s, k) %>%
+  summarise(median_p = median(p), sd_p = sd(p), median_ln = median(ln), sd_ln = sd(ln), w= wilcox.test(p, ln)$p.value) %>%
+  mutate(sd_p = sprintf("%.1f", sd_p), sd_ln = sprintf("%.1f", sd_ln), sig = (w <= 0.01)) %>%
+  mutate(`Median # SNPs P-thresholding  (sd)` = str_c(median_p, " (", sd_p, ")"), `Median # SNPs LassoNet (sd)` = str_c(median_ln, " (", sd_ln, ")")) %>%
+  select(h2s, k, `Median # SNPs P-thresholding  (sd)`, `Median # SNPs LassoNet (sd)`, w, sig)
+fig4
+```
+
+```{r}
+fig4 %>%
+  select(-w) %>%
+  xtable() %>%
+  print(include.rownames=FALSE)
+```
+
+fig5 svm genvar 0.3 d 10k
+
+```{r}
+fig5 <-
+  df %>% 
+  filter(d == 10000, genvar == 0.3) %>%
+  select(h2s, k, method, svm, i) %>%
+  pivot_wider(names_from = method, values_from = svm) %>%
+  group_by(h2s, k) %>%
+  summarise(median_p = median(p), sd_p = sd(p), median_ln = median(ln), sd_ln = sd(ln), w= wilcox.test(p, ln)$p.value) %>%
+  mutate(sd_p = sprintf("%.2f", sd_p), sd_ln = sprintf("%.2f", sd_ln), sig = (w <= 0.01)) %>%
+  mutate(`Median # SNPs P-thresholding  (sd)` = str_c(sprintf("%0.2f", median_p), " (", sd_p, ")"), `Median # SNPs LassoNet (sd)` = str_c(sprintf("%0.2f", median_ln), " (", sd_ln, ")")) %>%
+  select(h2s, k, `Median # SNPs P-thresholding  (sd)`, `Median # SNPs LassoNet (sd)`, w, sig)
+fig5
+```
+
+```{r}
+fig5 %>%
+  select(-w) %>%
+  xtable() %>%
+  print(include.rownames=FALSE)
+```
+
+```{r}
+fig6 <-
+  df %>% 
+  filter(d == 10000, genvar == 0.7) %>%
+  select(h2s, k, method, svm, i) %>%
+  pivot_wider(names_from = method, values_from = svm) %>%
+  group_by(h2s, k) %>%
+  summarise(median_p = median(p), sd_p = sd(p), median_ln = median(ln), sd_ln = sd(ln), w= wilcox.test(p, ln)$p.value) %>%
+  mutate(sd_p = sprintf("%.2f", sd_p), sd_ln = sprintf("%.2f", sd_ln), sig = (w <= 0.01)) %>%
+  mutate(`Median # SNPs P-thresholding  (sd)` = str_c(sprintf("%0.2f", median_p), " (", sd_p, ")"), `Median # SNPs LassoNet (sd)` = str_c(sprintf("%0.2f", median_ln), " (", sd_ln, ")")) %>%
+  select(h2s, k, `Median # SNPs P-thresholding  (sd)`, `Median # SNPs LassoNet (sd)`, w, sig)
+fig6
+```
+
+```{r}
+fig6 %>%
+  select(-w) %>%
+  xtable() %>%
+  print(include.rownames=FALSE)
+```
+
+
+```{r}
+all <-
+  df %>% 
+  filter(k <= 300) %>%
+  pivot_wider(names_from = method, values_from = c(n_causals, svm, lr)) %>%
+  group_by(h2s, genvar, d, k) %>%
+  summarise(
+    median_n_causals_p = median(n_causals_p), 
+    sd_n_causals_p = sd(n_causals_p), 
+    median_n_causals_ln = median(n_causals_ln), 
+    sd_n_causals_ln = sd(n_causals_ln), 
+    w_n_causals = wilcox.test(n_causals_p, n_causals_ln)$p.value,
+    median_lr_p = median(lr_p), 
+    sd_lr_p = sd(lr_p), 
+    median_lr_ln = median(lr_ln), 
+    sd_lr_ln = sd(lr_ln), 
+    w_lr = wilcox.test(lr_p, lr_ln)$p.value,
+    median_svm_p = median(svm_p), 
+    sd_svm_p = sd(svm_p), 
+    median_svm_ln = median(svm_ln), 
+    sd_svm_ln = sd(svm_ln), 
+    w_svm = wilcox.test(svm_p, svm_ln)$p.value
+    ) %>%
+  mutate(
+    sd_n_causals_p = sprintf("%.1f", sd_n_causals_p),
+    sd_n_causals_ln = sprintf("%.1f", sd_n_causals_ln),
+    sd_lr_p = sprintf("%.1f", sd_lr_p),
+    sd_lr_ln = sprintf("%.1f", sd_lr_ln),
+    sd_svm_p = sprintf("%.1f", sd_svm_p),
+    sd_svm_ln = sprintf("%.1f", sd_svm_ln),
+    median_lr_p = sprintf("%.2f", median_lr_p),
+    median_lr_ln = sprintf("%.2f", median_lr_ln),
+    median_svm_p = sprintf("%.2f", median_svm_p),
+    median_svm_ln = sprintf("%.2f", median_svm_ln),
+    ) %>%
+  mutate(
+    n_causals_p = str_c(median_n_causals_p, " (", sd_n_causals_p, ")"), 
+    n_causals_ln = str_c(median_n_causals_ln, " (", sd_n_causals_ln, ")"), 
+    n_causals_wilcox = w_n_causals,
+    lr_p = str_c(median_lr_p, " (", sd_lr_p, ")"), 
+    lr_ln = str_c(median_lr_ln, " (", sd_lr_ln, ")"), 
+    lr_wilcox = w_lr,
+    svm_p = str_c(median_svm_p, " (", sd_svm_p, ")"), 
+    svm_ln = str_c(median_svm_ln, " (", sd_svm_ln, ")"), 
+    svm_wilcox = w_svm
+    ) %>%
+  select(
+    d,
+    genvar,
+    h2s,
+    k,
+    n_causals_p,
+    n_causals_ln,
+    lr_p,
+    lr_ln,
+    svm_p,
+    svm_ln,
+    n_causals_wilcox,
+    lr_wilcox,
+    svm_wilcox
+  ) %>%
+  arrange(desc(d), genvar, h2s)
+
+all
+```
+
+```{r}
+all %>%
+  mutate(d=ifelse(n_causals_wilcox <= 0.01, str_c("\\rowcolor{Gray}", d), str_c(d))) %>% 
+  select(
+    d,
+    genvar,
+    h2s,
+    k,
+    n_causals_p,
+    n_causals_ln,
+    lr_p,
+    lr_ln,
+    svm_p,
+    svm_ln
+    ) %>%
+  xtable() %>% 
+  print(include.rownames=FALSE)
+```
+
